@@ -168,6 +168,24 @@ class Solution:
             mn, mx = max(mn, x, mn * x, mx * x), min(mx, x, mn * x, mx * x)
         return max(mn, mx)
 
+    def countWays(self, nums: List[int]) -> int:
+        nums.sort()
+        ans = nums[0] > 0
+        for i, (x, y) in enumerate(pairwise(nums), 1):
+            if x < i < y:
+                ans += 1
+        return ans + 1
+
+    def clearDigits(self, s: str) -> str:
+        st = []
+        for ch in s:
+            # 如果遇到数组 上一个肯定是字母 直接弹出栈顶元素即可
+            if str.isdigit(ch):
+                st.pop()
+            else:
+                st.append(ch)
+        return "".join(st)
+
     class MagicDictionary:
 
         def __init__(self):
@@ -220,4 +238,4 @@ class Solution:
 
 
 s = Solution
-print(s.maxConsecutiveAnswers(s, 'TTFF', 2))
+print(s.clearDigits(s, 'ab12'))
