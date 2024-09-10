@@ -1,9 +1,12 @@
 import re
 from builtins import str
 from collections import deque, Counter, defaultdict
-# from itertools import pairwise, accumulate
+from functools import cache
 from queue import PriorityQueue
-from typing import List, Dict
+from typing import List, Dict, Optional
+
+from src.tool import Construct
+from src.tool.Construct import ListNode
 
 
 class Solution:
@@ -169,12 +172,36 @@ class Solution:
         return max(mn, mx)
 
     def countWays(self, nums: List[int]) -> int:
+        n = len(nums)
         nums.sort()
-        ans = nums[0] > 0
-        for i, (x, y) in enumerate(pairwise(nums), 1):
-            if x < i < y:
-                ans += 1
-        return ans + 1
+        ans = 0
+        # 枚举选中了k个元素  前k要小于l 后n-k要大于k
+        for k in range(0, n + 1):
+            if 0 < k <= nums[k - 1]:
+                continue
+            if n > k >= nums[k]:
+                continue
+            ans += 1
+        return ans
+
+    def maximumLength(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+
+        # 以nums[i]结尾的 至多有j个的最大长度
+        @cache
+        def dfs(i: int, j: int) -> int:
+            if i == 0:
+                return 0
+            mx = 0
+            # 枚举j之前的每一个元素
+            for p in range(i):
+                if nums[p] == nums[i]:
+                    mx = max(mx, dfs(p, j) + 1)
+                elif p and nums[p] != nums[i]:
+                    mx = max(mx, dfs(p, j - 1) + 1)
+            return mx
+
+        return max(dfs(i, k) for i in range(n - 1, -1, -1))
 
     def clearDigits(self, s: str) -> str:
         st = []
@@ -185,6 +212,21 @@ class Solution:
             else:
                 st.append(ch)
         return "".join(st)
+
+    def mergeNodes(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        # ans 1
+        tail = head
+        cur = head.next
+        while cur.next:
+            if cur.val:
+                tail.val += cur.val
+            else:
+                # 重置头结点 sum
+                tail = tail.next
+                tail.val = 0
+            cur = cur.next
+        tail.next = None
+        return head
 
     class MagicDictionary:
 
@@ -237,5 +279,7 @@ class Solution:
             self.subordinates = subordinates
 
 
+c = Construct
+head = c.array_to_linked_list([0, 3, 1, 0, 4, 5, 2, 0])
 s = Solution
-print(s.clearDigits(s, 'ab12'))
+print(s.mergeNodes(s, head))

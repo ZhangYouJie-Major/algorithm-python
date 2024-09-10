@@ -16,3 +16,8 @@ print(Counter('331314'))
 dic = defaultdict(int)
 dic['a'] = 1
 print(dic)
+
+
+
+for i in range(10, -1, -1):
+    print(i)
