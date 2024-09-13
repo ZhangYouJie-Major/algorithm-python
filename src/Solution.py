@@ -1,3 +1,4 @@
+import bisect
 import re
 from builtins import str
 from collections import deque, Counter, defaultdict
@@ -228,58 +229,143 @@ class Solution:
         tail.next = None
         return head
 
-    class MagicDictionary:
+    def sortedSquares(self, nums: List[int]) -> List[int]:
+        n = len(nums)
+        ans = [0] * n
+        i, j = 0, n - 1
+        for p in range(n - 1, -1, -1):
+            x = nums[i] * nums[i]
+            y = nums[j] * nums[j]
+            if x > y:
+                ans[p] = x
+                i += 1
+            else:
+                ans[p] = y
+                j -= 1
+        return ans
 
-        def __init__(self):
-            self.dictionary = set()
+    def countQuadruplets(self, nums: List[int]) -> int:
+        n = len(nums)
+        great = [0] * n
+        great[-1] = [0] * (n + 1)
+        # great[k][num[j]] 在k的右侧比nums[j]大的元素
+        # less[j][nums[k]] 在j的左侧 比nums[k]小的元素
+        for k in range(n - 2, -1, -1):
+            great[k] = great[k + 1].copy()
+            for x in range(1, nums[k + 1]):
+                great[k][x] += 1
+        ans = 0
+        less = [0] * n
+        less[0] = [0] * (n + 1)
+        for j in range(1, n - 1):
+            for x in range(nums[j - 1] + 1, n + 1):
+                less[x] += 1
+            for k in range(j + 1, n - 1):
+                if nums[j] > nums[k]:
+                    ans += less[nums[k]] * great[nums[j]]
+        return ans
 
-        def buildDict(self, dictionary: List[str]) -> None:
-            self.dictionary = set(dictionary)
+    def maximizeWin(self, prizePositions: List[int], k: int) -> int:
+        """
+            假设第二段右端点为prizePositions[i] 则左端点为prizePositions[i]-k
 
-        def search(self, searchWord: str) -> bool:
+            dp[i] 表示右端点不超过prizePositions[i] 一条线段可以
+            1、 不选 prizePositions[i] dp[i] = dp[i-1]
+            2、 选 dp[i] = i-j+1
+            dp[i] = max(dp[i-1], i-j+1)
 
-            for value in self.dictionary:
-                ctn = 0
-                if len(value) == len(searchWord):
-                    for index, ch in enumerate(searchWord):
-                        if value[index] != ch:
-                            ctn += 1
-                    if ctn == 1:
-                        return True
-            return False
+        """
+        n = len(prizePositions)
+        dp = [0] * (n + 1)
+        ans = 0
+        for i in range(n):
+            x = bisect.bisect_left(prizePositions, prizePositions[i] - k)
+            ans = max(ans, dp[x] + i - x + 1)
+            dp[i + 1] = max(dp[i], i - x + 1)
+        return ans
 
-        sum = 0
+    def maxNumOfMarkedIndices(self, nums: List[int]) -> int:
+        nums.sort()
+        i = 0
+        # 取另外一遍的数字 如果能匹配 两边做指针右移
+        for x in nums[(len(nums) + 1) // 2:]:
+            if 2 * nums[i] <= x:
+                i += 1
+        return i * 2
 
-        def getImportance(self, employees: List['Employee'], id: int) -> int:
-            employees = {e.id: e for e in employees}
+    def maximumRobots(self, chargeTimes: List[int], runningCosts: List[int], budget: int) -> int:
+        q = deque()
+        ans = s = left = 0
 
-            def dfs(id: int) -> int:
-                employee = employees[id]
-                return employee.importance + sum(dfs(sub) for sub in employee.subordinates)
+        for right, (c, r) in enumerate(zip(chargeTimes, runningCosts)):
+            while q and c >= chargeTimes[q[-1]]:
+                q.pop()
+            q.append(right)
+            s += r
 
-            return dfs(id)
+            while q and chargeTimes[q[0]] + s * (right - left + 1) > budget:
+                if q[0] == left:
+                    q.popleft()
+                s -= runningCosts[left]
+                left += 1
+            ans = max(ans, right - left + 1)
+        return ans
 
-    class NumMatrix:
 
-        def __init__(self, matrix: List[List[int]]):
-            m, n = len(matrix), len(matrix[0])
-            s = [[0] * (n + 1) for _ in range(m + 1)]
-            for i, row in enumerate(matrix):
-                for j, col in enumerate(row):
-                    s[i + 1][j + 1] = s[i + 1][j] + s[i][j + 1] - s[i][j] + col
-            self.s = s
+class MagicDictionary:
 
-        def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:
-            return self.s[row2 + 1][col2 + 1] - self.s[row1][col2 + 1] - self.s[row2 + 1][col1] + self.s[row1][col1]
+    def __init__(self):
+        self.dictionary = set()
 
-    class Employee:
-        def __init__(self, id: int, importance: int, subordinates: List[int]):
-            self.id = id
-            self.importance = importance
-            self.subordinates = subordinates
+    def buildDict(self, dictionary: List[str]) -> None:
+        self.dictionary = set(dictionary)
+
+    def search(self, searchWord: str) -> bool:
+
+        for value in self.dictionary:
+            ctn = 0
+            if len(value) == len(searchWord):
+                for index, ch in enumerate(searchWord):
+                    if value[index] != ch:
+                        ctn += 1
+                if ctn == 1:
+                    return True
+        return False
+
+    sum = 0
+
+    def getImportance(self, employees: List['Employee'], id: int) -> int:
+        employees = {e.id: e for e in employees}
+
+        def dfs(id: int) -> int:
+            employee = employees[id]
+            return employee.importance + sum(dfs(sub) for sub in employee.subordinates)
+
+        return dfs(id)
+
+
+class NumMatrix:
+
+    def __init__(self, matrix: List[List[int]]):
+        m, n = len(matrix), len(matrix[0])
+        s = [[0] * (n + 1) for _ in range(m + 1)]
+        for i, row in enumerate(matrix):
+            for j, col in enumerate(row):
+                s[i + 1][j + 1] = s[i + 1][j] + s[i][j + 1] - s[i][j] + col
+        self.s = s
+
+    def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:
+        return self.s[row2 + 1][col2 + 1] - self.s[row1][col2 + 1] - self.s[row2 + 1][col1] + self.s[row1][col1]
+
+
+class Employee:
+    def __init__(self, id: int, importance: int, subordinates: List[int]):
+        self.id = id
+        self.importance = importance
+        self.subordinates = subordinates
 
 
 c = Construct
 head = c.array_to_linked_list([0, 3, 1, 0, 4, 5, 2, 0])
 s = Solution
-print(s.mergeNodes(s, head))
+print(s.maximumRobots(s, [11, 12, 19], [10, 8, 7], 19))
