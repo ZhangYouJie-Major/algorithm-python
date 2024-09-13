@@ -311,6 +311,81 @@ class Solution:
             ans = max(ans, right - left + 1)
         return ans
 
+    def maxVowels(self, s: str, k: int) -> int:
+        """
+            1、 入i元素  如果i < k-1 则重复第一步
+            2、更新元素
+            3、出 i- k +1 元素
+        """
+        ans = windows = 0
+        for i, val in enumerate(s):
+            if val in 'aeiou':
+                windows += 1
+            if i < k - 1:
+                continue
+            ans = max(ans, windows)
+            if s[i - k + 1] in 'aeiou':
+                windows -= 1
+        return ans
+
+    def maximumLengthSubstring(self, s: str) -> int:
+        left = ans = 0
+        ctn = defaultdict(int)
+        for right, val in enumerate(s):
+            ctn[val] += 1
+            while any(value > 2 for value in ctn.values()):
+                ctn[s[left:left + 1]] -= 1
+                left += 1
+            ans = max(ans, right - left + 1)
+        return ans
+
+    def longestSubarray(self, nums: List[int]) -> int:
+        left = ans = 0
+        ctn = [0] * 2
+        for right, val in enumerate(nums):
+            ctn[val] += 1
+            while ctn[0] > 1:
+                ctn[nums[left]] -= 1
+                left += 1
+            ans = max(ans, right - left)
+        return ans if ans != len(nums) else len(nums) - 1
+
+    def equalSubstring(self, s: str, t: str, maxCost: int) -> int:
+        ans = left = 0
+        diff = 0
+        for right, (ch1, ch2) in enumerate(zip(s, t)):
+            diff += abs(ord(ch1) - ord(ch2))
+            while diff > maxCost:
+                diff -= abs(ord(s[left]) - ord(t[left]))
+                left += 1
+            ans = max(ans, right - left + 1)
+        return ans
+
+    def longestSemiRepetitiveSubstring(self, s: str) -> int:
+        ans, left, repeat = 1, 0, 0
+        n = len(s)
+        for right in range(1, n):
+            repeat += s[right] == s[right - 1]
+            while repeat > 1:
+                if s[left] == s[left + 1]:
+                    repeat -= 1
+                left += 1
+            ans = max(ans, right - left + 1)
+        return ans
+
+    def totalFruit(self, fruits: List[int]) -> int:
+        ans = left = 0
+        ctn = defaultdict(int)
+        for right, val in enumerate(fruits):
+            ctn[val] += 1
+            while len(ctn.keys()) > 2:
+                ctn[fruits[left]] -= 1
+                if ctn[fruits[left]] == 0:
+                    del ctn[fruits[left]]
+                left += 1
+            ans = max(ans, right - left + 1)
+        return ans
+
 
 class MagicDictionary:
 
@@ -368,4 +443,4 @@ class Employee:
 c = Construct
 head = c.array_to_linked_list([0, 3, 1, 0, 4, 5, 2, 0])
 s = Solution
-print(s.maximumRobots(s, [11, 12, 19], [10, 8, 7], 19))
+print(s.totalFruit(s, [3, 3, 3, 1, 2, 1, 1, 2, 3, 3, 4]))
