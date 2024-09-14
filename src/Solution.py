@@ -386,6 +386,16 @@ class Solution:
             ans = max(ans, right - left + 1)
         return ans
 
+    def removeStars(self, s: str) -> str:
+        # 栈模拟
+        q = deque()
+        for ch in s:
+            if ch != '*':
+                q.append(ch)
+            else:
+                q.pop()
+        return "".join(q)
+
 
 class MagicDictionary:
 
@@ -443,4 +453,4 @@ class Employee:
 c = Construct
 head = c.array_to_linked_list([0, 3, 1, 0, 4, 5, 2, 0])
 s = Solution
-print(s.totalFruit(s, [3, 3, 3, 1, 2, 1, 1, 2, 3, 3, 4]))
+print(s.removeStars(s, 'leet**cod*e'))
