@@ -1,3 +1,4 @@
+import sys
 import bisect
 import re
 from builtins import str
@@ -8,6 +9,7 @@ from typing import List, Dict, Optional
 
 from src.tool import Construct
 from src.tool.Construct import ListNode
+from itertools import pairwise, accumulate
 
 
 class Solution:
@@ -396,61 +398,45 @@ class Solution:
                 q.pop()
         return "".join(q)
 
+    def maximumUniqueSubarray(self, nums: List[int]) -> int:
+        mx = sum = left = 0
+        ctn = defaultdict(int)
+        for right, val in enumerate(nums):
+            ctn[val] += 1
+            sum += val
+            while ctn[val] > 1:
+                ctn[nums[left]] -= 1
+                sum -= nums[left]
+                left += 1
+            mx = max(mx, sum)
 
-class MagicDictionary:
+        return mx
 
-    def __init__(self):
-        self.dictionary = set()
+    def maxSubarrayLength(self, nums: List[int], k: int) -> int:
+        ans = left = 0
+        ctn = defaultdict(int)
+        for right, val in enumerate(nums):
+            ctn[val] += 1
+            while ctn[val] > k:
+                ctn[nums[left]] -= 1
+                left += 1
+            ans = max(ans, right - left + 1)
+        return ans
 
-    def buildDict(self, dictionary: List[str]) -> None:
-        self.dictionary = set(dictionary)
+    def maximumBeauty(self, nums: List[int], k: int) -> int:
 
-    def search(self, searchWord: str) -> bool:
+         # 因为变化的上下区间可以浮动 -> 把所有数字排序后 交集不为空的最大长度
+         # 我们保证最左侧和最右侧的交集不为空 则中间的交集不会为空
+         # x + k >= y - k ->  y - x <= 2k
 
-        for value in self.dictionary:
-            ctn = 0
-            if len(value) == len(searchWord):
-                for index, ch in enumerate(searchWord):
-                    if value[index] != ch:
-                        ctn += 1
-                if ctn == 1:
-                    return True
-        return False
-
-    sum = 0
-
-    def getImportance(self, employees: List['Employee'], id: int) -> int:
-        employees = {e.id: e for e in employees}
-
-        def dfs(id: int) -> int:
-            employee = employees[id]
-            return employee.importance + sum(dfs(sub) for sub in employee.subordinates)
-
-        return dfs(id)
-
-
-class NumMatrix:
-
-    def __init__(self, matrix: List[List[int]]):
-        m, n = len(matrix), len(matrix[0])
-        s = [[0] * (n + 1) for _ in range(m + 1)]
-        for i, row in enumerate(matrix):
-            for j, col in enumerate(row):
-                s[i + 1][j + 1] = s[i + 1][j] + s[i][j + 1] - s[i][j] + col
-        self.s = s
-
-    def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:
-        return self.s[row2 + 1][col2 + 1] - self.s[row1][col2 + 1] - self.s[row2 + 1][col1] + self.s[row1][col1]
+        nums.sort()
+        ans = left = 0
+        for right, val in enumerate(nums):
+            while val - nums[left] > 2 * k:
+                left += 1
+            ans = max(ans, right - left + 1)
+        return ans
 
 
-class Employee:
-    def __init__(self, id: int, importance: int, subordinates: List[int]):
-        self.id = id
-        self.importance = importance
-        self.subordinates = subordinates
-
-
-c = Construct
-head = c.array_to_linked_list([0, 3, 1, 0, 4, 5, 2, 0])
 s = Solution
-print(s.removeStars(s, 'leet**cod*e'))
+print(s.maximumBeauty(s, [4, 6, 1, 2], 2))
