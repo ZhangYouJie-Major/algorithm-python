@@ -425,9 +425,9 @@ class Solution:
 
     def maximumBeauty(self, nums: List[int], k: int) -> int:
 
-         # 因为变化的上下区间可以浮动 -> 把所有数字排序后 交集不为空的最大长度
-         # 我们保证最左侧和最右侧的交集不为空 则中间的交集不会为空
-         # x + k >= y - k ->  y - x <= 2k
+        # 因为变化的上下区间可以浮动 -> 把所有数字排序后 交集不为空的最大长度
+        # 我们保证最左侧和最右侧的交集不为空 则中间的交集不会为空
+        # x + k >= y - k ->  y - x <= 2k
 
         nums.sort()
         ans = left = 0
@@ -437,6 +437,30 @@ class Solution:
             ans = max(ans, right - left + 1)
         return ans
 
+    def latestTimeCatchTheBus(self, buses: List[int], passengers: List[int], capacity: int) -> int:
+        # 先排序
+        buses.sort()
+        passengers.sort()
+
+        # 模拟乘客上车
+        j = 0
+        for b in buses:
+            c = capacity
+
+            # passengers[j] <= b 下车时间在出发前的  上车
+            while c and j < len(passengers) and passengers[j] <= b:
+                j += 1
+                c -= 1
+        j -= 1
+        # 插队  如果还有座位直接在末站下车
+        ans = buses[-1] if c else passengers[j]
+
+        # 插队 寻找j 上一个没下车的坐标
+        while j >= 0 and ans == passengers[j]:
+            j -= 1
+            ans -= 1
+        return ans
+
 
 s = Solution
-print(s.maximumBeauty(s, [4, 6, 1, 2], 2))
+print(s.latestTimeCatchTheBus(s, [10, 20], [2, 17, 18, 19], 2))
