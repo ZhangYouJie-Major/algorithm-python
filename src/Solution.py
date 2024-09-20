@@ -517,6 +517,48 @@ class Solution:
 
         return dfs(0, 0, True, False)
 
+    def atMostNGivenDigitSet(self, digits: List[str], n: int) -> int:
+        s = str(n)
+
+        """
+            is_limit 表示前面填的数字是否都是n对应位置的 如果为True 则当前位置最多为int(s[i]) 否则至多为9
+            is_num 表示前面是否填了数字  如果为True 则当前可以从0开始 False则需要从1开始  保证不出现 010这样的数据
+        """
+
+        @cache
+        def dfs(i: int, is_limit: bool, is_num: bool) -> int:
+            if i == len(s):
+                return int(is_num)
+            res = 0
+            if not is_num:
+                res += dfs(i + 1, False, False)
+            up = s[i] if is_limit else '9'
+            for d in digits:
+                if d > up:
+                    break
+                res += dfs(i + 1, is_limit and d == up, True)
+            return res
+
+        return dfs(0, True, False)
+
+    def countDigitOne(self, n: int) -> int:
+        s = str(n)
+        """
+            dfs(i,ctn,is_limit) 表示前i位有ctn个1的情况下 我们可以构造的数组 包含1的总和
+            is_limit 表示前面填的数字是否都是n对应位置的 如果为True 则当前位置最多为int(s[i]) 否则至多为9
+        """
+        @cache
+        def dfs(i: int, ctn: int, is_limit: bool) -> int:
+            if i == len(s):
+                return ctn
+            res = 0
+            up = int(s[i]) if is_limit else 9
+            for d in range(up + 1):
+                res += dfs(i + 1, ctn + (d == 1), is_limit and d == up)
+            return res
+
+        return dfs(0, 0, True)
+
 
 s = Solution
-print(s.countSpecialNumbers(s, 201))
+print(s.countDigitOne(s, 13))
