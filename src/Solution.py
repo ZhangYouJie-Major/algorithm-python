@@ -90,9 +90,6 @@ class Solution:
     #     # arr = list(accumulate((x % 2 == y % 2 for x, y in pairwise(nums)), initial=0))
     #     return [arr[from_] == arr[to] for from_, to in queries]
 
-    def maxScore(self, grid: List[List[int]]) -> int:
-        return 1
-
     def checkRecord(self, s: str) -> bool:
         return s.count('A') < 2 and 'LLL' not in s
 
@@ -461,6 +458,64 @@ class Solution:
             ans -= 1
         return ans
 
+    def longestContinuousSubstring(self, s: str) -> int:
+        ans = ctn = 1
+        for x, y in pairwise(map(ord, s)):
+            ctn = ctn + 1 if x + 1 == y else 1
+            ans = max(ans, ctn)
+        return ans
+
+    def maximumSubarraySum(self, nums: List[int], k: int) -> int:
+        ctn = Counter(nums[:k - 1])
+        s = sum(nums[:k - 1])
+        ans = 0
+        for in_, out in zip(nums[k - 1:], nums):
+            ctn[in_] += 1
+            s += in_
+            if len(ctn.keys()) == k:
+                ans = max(ans, s)
+            ctn[out] -= 1
+            if ctn[out] == 0:
+                del ctn[out]
+            s -= out
+        return ans
+
+    def maxScore(self, cardPoints: List[int], k: int) -> int:
+        # k张牌的最大值 n-k的最小值
+        n = len(cardPoints)
+        sum_ = sum(cardPoints)
+        m = n - k
+        ans = 0
+        m_sum = sum(cardPoints[:m])
+        ans = max(ans, sum_ - m_sum)
+        for i in range(m, n):
+            m_sum += cardPoints[i]
+            m_sum -= cardPoints[i - m]
+            ans = max(ans, sum_ - m_sum)
+        return ans
+
+    def countSpecialNumbers(self, n: int) -> int:
+        s = str(n)
+        """
+            is_limit 表示前面填的数字是否都是n对应位置的 如果为True 则当前位置最多为int(s[i]) 否则至多为9
+            is_num 表示前面是否填了数字  如果为True 则当前可以从0开始 False则需要从1开始  保证不出现 010这样的数据
+        """
+
+        @cache
+        def dfs(i: int, mask: int, is_limit: bool, is_num: bool) -> int:
+            if i == len(s):
+                return 1 if is_num else 0
+            res = 0
+            if not is_num:
+                res += dfs(i + 1, mask, False, False)
+            up = int(s[i]) if is_limit else 9
+            for d in range(1 - int(is_num), up + 1):
+                if mask >> d & 1 == 0:
+                    res += dfs(i + 1, mask | (1 << d), is_limit and d == up, True)
+            return res
+
+        return dfs(0, 0, True, False)
+
 
 s = Solution
-print(s.latestTimeCatchTheBus(s, [10, 20], [2, 17, 18, 19], 2))
+print(s.countSpecialNumbers(s, 201))
