@@ -496,6 +496,7 @@ class Solution:
 
     def countSpecialNumbers(self, n: int) -> int:
         s = str(n)
+
         """
             is_limit 表示前面填的数字是否都是n对应位置的 如果为True 则当前位置最多为int(s[i]) 否则至多为9
             is_num 表示前面是否填了数字  如果为True 则当前可以从0开始 False则需要从1开始  保证不出现 010这样的数据
