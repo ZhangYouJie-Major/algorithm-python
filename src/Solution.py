@@ -547,6 +547,7 @@ class Solution:
             dfs(i,ctn,is_limit) 表示前i位有ctn个1的情况下 我们可以构造的数组 包含1的总和
             is_limit 表示前面填的数字是否都是n对应位置的 如果为True 则当前位置最多为int(s[i]) 否则至多为9
         """
+
         @cache
         def dfs(i: int, ctn: int, is_limit: bool) -> int:
             if i == len(s):
@@ -559,6 +560,35 @@ class Solution:
 
         return dfs(0, 0, True)
 
+    def maxScore(self, a: List[int], b: List[int]) -> int:
+        len_b = len(b)
+        a0, a1, a2, a3 = a[0], a[1], a[2], a[3]
+        ans = -100000
+        for i in range(len_b):
+            if a0 * b[i] <= 0:
+                continue
+            for j in range(i + 1, len_b):
+                if a1 * b[j] <= 0:
+                    continue
+                for k in (j + 1, len_b):
+                    if a2 * b[k] <= 0:
+                        continue
+                    for f in range(k + 1, len_b):
+                        if a3 * b[f] <= 0:
+                            continue
+                        ans = max(ans, a0 * b[i] + a1 * b[j] + a2 * b[k] + a3 * b[f])
+
+        return ans
+
+    def edgeScore(self, edges: List[int]) -> int:
+        score = [0] * len(edges)
+        ans = 0
+        for i, to in enumerate(edges):
+            score[to] += i
+            if score[to] > score[ans] or score[to] == score[ans] and to < ans:
+                ans = to
+        return ans
+
 
 s = Solution
-print(s.countDigitOne(s, 13))
+print(s.edgeScore(s, [1, 0, 0, 0, 0, 7, 7, 5]))
