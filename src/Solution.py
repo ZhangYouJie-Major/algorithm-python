@@ -1,6 +1,5 @@
-import sys
-import bisect
 import re
+from bisect import bisect_right, bisect_left
 from builtins import str
 from collections import deque, Counter, defaultdict
 from functools import cache
@@ -76,19 +75,9 @@ class Solution:
 
         return -1
 
-    def isArraySpecial(self, nums: List[int]) -> bool:
-        if len(nums) == 1:
-            return True
-
-        for index in range(1, len(nums)):
-            if nums[index] % 2 == nums[index - 1] % 2:
-                return False
-
-        return True
-
-    # def isArraySpecial2(self, nums: List[int], queries: List[List[int]]) -> List[bool]:
-    #     # arr = list(accumulate((x % 2 == y % 2 for x, y in pairwise(nums)), initial=0))
-    #     return [arr[from_] == arr[to] for from_, to in queries]
+    def isArraySpecial(self, nums: List[int], queries: List[List[int]]) -> List[bool]:
+        arr = list(accumulate((x % 2 == y % 2 for x, y in pairwise(nums)), initial=0))
+        return [arr[from_] == arr[to] for from_, to in queries]
 
     def checkRecord(self, s: str) -> bool:
         return s.count('A') < 2 and 'LLL' not in s
@@ -98,11 +87,10 @@ class Solution:
 
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         dic = {}
-        for index, value in enumerate(nums):
-            if target - value in dic:
-                return [dic[target - value], index]
-
-            dic[index] = value
+        for i, val in enumerate(nums):
+            if target - val in dic:
+                return [i, dic[target - val]]
+            dic[val] = i
 
     def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
         dic = defaultdict(list)
@@ -278,7 +266,7 @@ class Solution:
         dp = [0] * (n + 1)
         ans = 0
         for i in range(n):
-            x = bisect.bisect_left(prizePositions, prizePositions[i] - k)
+            x = bisect_left(prizePositions, prizePositions[i] - k)
             ans = max(ans, dp[x] + i - x + 1)
             dp[i + 1] = max(dp[i], i - x + 1)
         return ans
@@ -560,26 +548,6 @@ class Solution:
 
         return dfs(0, 0, True)
 
-    def maxScore(self, a: List[int], b: List[int]) -> int:
-        len_b = len(b)
-        a0, a1, a2, a3 = a[0], a[1], a[2], a[3]
-        ans = -100000
-        for i in range(len_b):
-            if a0 * b[i] <= 0:
-                continue
-            for j in range(i + 1, len_b):
-                if a1 * b[j] <= 0:
-                    continue
-                for k in (j + 1, len_b):
-                    if a2 * b[k] <= 0:
-                        continue
-                    for f in range(k + 1, len_b):
-                        if a3 * b[f] <= 0:
-                            continue
-                        ans = max(ans, a0 * b[i] + a1 * b[j] + a2 * b[k] + a3 * b[f])
-
-        return ans
-
     def edgeScore(self, edges: List[int]) -> int:
         score = [0] * len(edges)
         ans = 0
@@ -589,6 +557,23 @@ class Solution:
                 ans = to
         return ans
 
+    def vowelStrings(self, words: List[str], queries: List[List[int]]) -> List[int]:
+        s = [0] * (len(words) + 1)
+        for i, val in enumerate(words):
+            s[i + 1] = s[i] + (val[0] in 'aeiou' and val[-1] in 'aeiou')
+        ans = [] * (len(queries))
+        for q in queries:
+            ans.append(s[q[1] + 1] - s[q[0]])
+        return ans
+
+    def answerQueries(self, nums: List[int], queries: List[int]) -> List[int]:
+        nums.sort()
+        for i in range(1, len(nums)):
+            nums[i] += nums[i - 1]
+        for i, val in enumerate(queries):
+            queries[i] = bisect_right(nums, val)
+        return queries
+
 
 s = Solution
-print(s.edgeScore(s, [1, 0, 0, 0, 0, 7, 7, 5]))
+print(s.isArraySpecial(s, [4, 3, 1, 6], [[0, 2], [2, 3]]))

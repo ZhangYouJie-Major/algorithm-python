@@ -52,3 +52,15 @@ class MagicDictionary:
             return employee.importance + sum(dfs(sub) for sub in employee.subordinates)
 
         return dfs(id)
+
+
+class NumArray:
+
+    def __init__(self, nums: List[int]):
+        s = [0] * (len(nums) + 1)
+        for i, val in enumerate(nums):
+            s[i + 1] = s[i] + val
+        self.s = s
+
+    def sumRange(self, left: int, right: int) -> int:
+        return self.s[right + 1] - self.s[left]
