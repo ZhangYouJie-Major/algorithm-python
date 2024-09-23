@@ -5,6 +5,7 @@ from collections import deque, Counter, defaultdict
 from functools import cache
 from queue import PriorityQueue
 from typing import List, Dict, Optional
+import math
 
 from src.tool import Construct
 from src.tool.Construct import ListNode
@@ -586,6 +587,27 @@ class Solution:
             mx = max(mx, i + val)
         return ans
 
+    def countBeautifulPairs(self, nums: List[int]) -> int:
+        n = len(nums)
+        ctn = 0
+        for i in range(n):
+            for j in range(i + 1, n):
+                if math.gcd(int(str(nums[i])[0]), int(str(nums[i])[-1])) == 1:
+                    ctn += 1
+        return ctn
+
+    def maximumTripletValue(self, nums: List[int]) -> int:
+        n = len(nums)
+        pre_max = [-1] * n
+        ans = 0
+        for i in range(1, n):
+            pre_max[i] = max(pre_max[i - 1], nums[i - 1])
+        suf_max = nums[-1]
+        for i in range(n - 2, 0, -1):
+            ans = max(ans, (pre_max[i] - nums[i]) * suf_max)
+            suf_max = max(suf_max, nums[i])
+        return ans
+
 
 s = Solution
-print(s.maxScoreSightseeingPair(s, [8, 1, 5, 2, 6]))
+print(s.maximumTripletValue(s, [1000000, 1, 1000000]))
