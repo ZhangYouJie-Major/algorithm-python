@@ -574,6 +574,18 @@ class Solution:
             queries[i] = bisect_right(nums, val)
         return queries
 
+    def findJudge(self, n: int, trust: List[List[int]]) -> int:
+        in_ = Counter(y for _, y in trust)
+        out_ = Counter(x for x, _ in trust)
+        return next((i for i in range(1, n + 1) if in_[i] == n - 1 and out_[i] == 0), -1)
+
+    def maxScoreSightseeingPair(self, values: List[int]) -> int:
+        ans = mx = 0
+        for i, val in enumerate(values):
+            ans = max(ans, mx + val - i)
+            mx = max(mx, i + val)
+        return ans
+
 
 s = Solution
-print(s.isArraySpecial(s, [4, 3, 1, 6], [[0, 2], [2, 3]]))
+print(s.maxScoreSightseeingPair(s, [8, 1, 5, 2, 6]))
