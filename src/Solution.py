@@ -629,8 +629,8 @@ class Solution:
         return ans
 
     def maxProfit2(self, prices: List[int]) -> int:
-        n = len(prices)
-
+        """
+         n = len(prices)
         @cache
         def dfs(i: int, hold: bool) -> int:
             if i < 0:
@@ -640,6 +640,13 @@ class Solution:
             return max(dfs(i - 1, False), dfs(i - 1, True) + prices[i])
 
         return dfs(n - 1, False)
+        """
+        buy = -prices[0]
+        sell = 0
+        for p in prices:
+            buy = max(buy, sell - p)
+            sell = max(sell, buy + p)
+        return sell
 
     def maxProfit3(self, prices: List[int]) -> int:
         n = len(prices)
