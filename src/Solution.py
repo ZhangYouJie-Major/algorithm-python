@@ -608,6 +608,50 @@ class Solution:
             suf_max = max(suf_max, nums[i])
         return ans
 
+    def maximumSubsequenceCount(self, text: str, pattern: str) -> int:
+        # 先统计text本身有多少个 pattern子序列 然后贪心的把pattern加在text两侧最大
+        a, b = pattern
+        ans = ctn_a = ctn_b = 0
+        for ch in text:
+            if ch == b:
+                ans += ctn_a
+                ctn_b += 1
+            if ch == a:
+                ctn_a += 1
+        return ans + max(ctn_a, ctn_b)
+
+    def maxProfit(self, prices: List[int]) -> int:
+        ans = 0
+        min_price = prices[0]
+        for p in prices:
+            ans = max(ans, p - min_price)
+            min_price = min(min_price, p)
+        return ans
+
+    def maxProfit2(self, prices: List[int]) -> int:
+        n = len(prices)
+
+        @cache
+        def dfs(i: int, hold: bool) -> int:
+            if i < 0:
+                return -math.inf if hold else 0
+            if hold:
+                return max(dfs(i - 1, True), dfs(i - 1, False) - prices[i])
+            return max(dfs(i - 1, False), dfs(i - 1, True) + prices[i])
+
+        return dfs(n - 1, False)
+
+    def maxProfit3(self, prices: List[int]) -> int:
+        n = len(prices)
+        buy_1 = buy_2 = -prices[0]
+        sell_1 = sell_2 = 0
+        for i in range(1, n):
+            buy_1 = max(buy_1, -prices[i])
+            sell_1 = max(sell_1, buy_1 + prices[i])
+            buy_2 = max(buy_2, sell_1 - prices[i])
+            sell_2 = max(sell_2, buy_2 + prices[i])
+        return sell_2
+
 
 s = Solution
-print(s.maximumTripletValue(s, [1000000, 1, 1000000]))
+print(s.maxProfit2(s, [7, 1, 5, 3, 6, 4]))
