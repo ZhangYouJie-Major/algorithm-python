@@ -1,15 +1,14 @@
+import math
 import re
 from bisect import bisect_right, bisect_left
 from builtins import str
 from collections import deque, Counter, defaultdict
 from functools import cache
+from itertools import pairwise, accumulate, combinations, permutations
 from queue import PriorityQueue
 from typing import List, Dict, Optional
-import math
 
-from src.tool import Construct
 from src.tool.Construct import ListNode
-from itertools import pairwise, accumulate
 
 
 class Solution:
@@ -659,6 +658,65 @@ class Solution:
             sell_2 = max(sell_2, buy_2 + prices[i])
         return sell_2
 
+    def differenceOfSum(self, nums: List[int]) -> int:
+        ans = 0
+        for x in nums:
+            ans += x
+            while x:
+                x -= x % 10
+                x = x // 10
+        return ans
+
+    def distinctNames(self, ideas: List[str]) -> int:
+        groups = defaultdict(set)
+        for s in ideas:
+            groups[s[0]].add(s[1:])
+        ans = 0
+        # 2 * ((a - (a & b)) * （b - (a & b)）
+        for a, b in permutations(groups.values(), 2):
+            # 枚举所有的value组对
+            m = len(a & b)  # a和b的交集
+            ans += (len(a) - m) * (len(b) - m)
+        return ans * 2
+
+    def maximumLength(self, nums: List[int], k: int) -> int:
+        """
+        f[x][j] 表示以x结尾的  有至多j对相邻不用元素的最长子序列的长度
+
+        f[x][j] = max(f[x][j] +1 ,max(f[y][j-1] for y in set  y != x ) + 1)
+        mx[j] 表示 max(f[y][j-1] for y in set  y != x )
+        f[x][j] = max(f[x][j] + 1, mx[j-1] + 1)
+
+        """
+
+        fs = {}
+        mx = [0] * (k + 2)
+        for x in nums:
+            if x not in fs:
+                fs[x] = [0] * (k + 2)
+            f = fs[x]
+            for j in range(k, -1, -1):
+                f[j] = max(f[j], mx[j]) + 1
+                mx[j + 1] = max(mx[j + 1], f[j])
+        return mx[-1]
+
+    def takeCharacters(self, s: str, k: int) -> int:
+        ctn = Counter(s)
+        if any(ctn[x] < k for x in 'abc'):
+            return -1
+        # 滑动窗口中 abc的数量最优解为 满足 ctn[a] - k,ctn[b] - k,ctn[c] - k的最大长度
+        ans = left = 0
+
+        for right, ch in enumerate(s):
+            # 窗口右移
+            ctn[ch] -= 1
+            # 如果取走后 ctn[ch] 小于k说明 两侧的已经取不到k了 需要减小窗口
+            while ctn[ch] < k:
+                ctn[s[left]] += 1
+                left += 1
+            ans = max(ans, right - left + 1)
+        return len(s) - ans
+
 
 s = Solution
-print(s.maxProfit2(s, [7, 1, 5, 3, 6, 4]))
+print(s.takeCharacters(s, 'aabaaaacaabc', 2))
