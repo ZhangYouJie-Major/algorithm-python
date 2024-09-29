@@ -717,6 +717,13 @@ class Solution:
             ans = max(ans, right - left + 1)
         return len(s) - ans
 
+    def timeRequiredToBuy(self, tickets: List[int], k: int) -> int:
+        """
+            tickets[k] 前面的减少的次数不超过 min(tickets[i],tickets[k])
+            tickets[k] 后面的减少的次数不超过 min(tickets[i],tickets[k]- 1)
+        """
+        return sum(min(val, tickets[k] - (i > k)) for i, val in enumerate(tickets))
+
 
 s = Solution
-print(s.takeCharacters(s, 'aabaaaacaabc', 2))
+print(s.timeRequiredToBuy(s, [2, 3, 2], 2))
