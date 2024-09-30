@@ -1,4 +1,6 @@
 from typing import List
+from collections import deque
+import heapq
 
 
 class NumMatrix:
@@ -64,3 +66,15 @@ class NumArray:
 
     def sumRange(self, left: int, right: int) -> int:
         return self.s[right + 1] - self.s[left]
+
+
+class SeatManager:
+
+    def __init__(self, n: int):
+        self.s = list(range(1, n + 1))
+
+    def reserve(self) -> int:
+        return heapq.heappop(self.s)
+
+    def unreserve(self, seatNumber: int) -> None:
+        return heapq.heappush(self.s, seatNumber)

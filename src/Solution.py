@@ -1,5 +1,4 @@
-import math
-import re
+import math, heapq, re
 from bisect import bisect_right, bisect_left
 from builtins import str
 from collections import deque, Counter, defaultdict
@@ -7,6 +6,7 @@ from functools import cache
 from itertools import pairwise, accumulate, combinations, permutations
 from queue import PriorityQueue
 from typing import List, Dict, Optional
+
 
 from src.tool.Construct import ListNode
 
@@ -724,6 +724,49 @@ class Solution:
         """
         return sum(min(val, tickets[k] - (i > k)) for i, val in enumerate(tickets))
 
+    def countSubarrays(self, nums: List[int], k: int) -> int:
+        ans = left = 0
+        ctn = 0
+        mx = max(nums)
+        for x in nums:
+            if x == mx:
+                ctn += 1
+            while ctn == k:
+                if mx == nums[left]:
+                    ctn -= 1
+                left += 1
+            ans += left
+        return ans
+
+    def countOfSubstrings(self, word: str, k: int) -> int:
+
+        """
+        f(word,k) 元音至少出现一次，并且至少有k个辅音字母的子字符串的总数
+        那么恰好k个就是  f(word,k) -  f(word,k+1)   k+1的长度比k大 总数自然比k小
+        """
+
+        def f(s: str, k: int) -> int:
+            ctn_1 = defaultdict(int)
+            ctn_2 = left = ans = 0
+            for ch in s:
+                if ch in 'aeiou':
+                    ctn_1[ch] += 1
+                else:
+                    ctn_2 += 1
+                while len(ctn_1) == 5 and ctn_2 >= k:
+                    out = s[left]
+                    if out in 'aeiou':
+                        ctn_1[out] -= 1
+                        if ctn_1[out] == 0:
+                            del ctn_1[out]
+                    else:
+                        ctn_2 -= 1
+                    left += 1
+                ans += left
+            return ans
+
+        return f(word, k) - f(word, k + 1)
+
 
 s = Solution
-print(s.timeRequiredToBuy(s, [2, 3, 2], 2))
+print(s.countOfSubstrings(s, 'ieaouqqieaouqq', 1))
