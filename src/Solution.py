@@ -7,7 +7,6 @@ from itertools import pairwise, accumulate, combinations, permutations
 from queue import PriorityQueue
 from typing import List, Dict, Optional
 
-
 from src.tool.Construct import ListNode
 
 
@@ -766,6 +765,27 @@ class Solution:
             return ans
 
         return f(word, k) - f(word, k + 1)
+
+    def destCity(self, paths: List[List[str]]) -> str:
+        set_a = set(p[0] for p in paths)
+        return next(p[1] for p in paths if p[1] not in set_a)
+
+    def minCost(self, maxTime: int, edges: List[List[int]], passingFees: List[int]) -> int:
+        # f[t][i] 表示经过t分钟 到达城市i的最小花费
+        n = len(passingFees)
+        f = [[math.inf] * n for _ in range(maxTime + 1)]
+        # 在城市0节点的花费
+        f[0][0] = passingFees[0]
+        for i in range(1, maxTime + 1):
+            for start, end, time in edges:
+                # i - time花费的最小值
+                if i - time >= 0:
+                    # i  - end - start
+                    f[i][start] = min(f[i][start], f[i - time][end] + passingFees[start])
+                    # i - start -end
+                    f[i][end] = min(f[i][end], f[i - time][start] + passingFees[end])
+        ans = min(f[i][n - 1] for i in range(maxTime + 1))
+        return ans if ans < math.inf else -1
 
 
 s = Solution
