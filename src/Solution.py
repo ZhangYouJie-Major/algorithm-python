@@ -787,6 +787,125 @@ class Solution:
         ans = min(f[i][n - 1] for i in range(maxTime + 1))
         return ans if ans < math.inf else -1
 
+    def romanToInt(self, s: str) -> int:
+        dic = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+        ans = 0
+        for x, y in pairwise(s):
+            x, y = dic[x], dic[y]
+            ans += x if x > y else -x
+        return ans + dic[s[-1]]
+
+    def myAtoi(self, s: str) -> int:
+        s = s.strip()
+        if not s:
+            return 0
+        ans, sign, index = 0, 1, 1
+        int_max, int_min, overflow = 2 ** 31 - 1, -2 ** 30, 2 ** 31 // 10  # 2147483647
+        c1 = s[0]
+        if c1 == '-1':
+            sign = -1
+        elif c1 != '+':
+            index = 0
+        for c in s[index:]:
+            if not '0' <= c <= '9':
+                break
+            #  判断是否溢出 10 *  ans > 2147483650  or res = 214748364 并且尾数大于7
+            if ans > overflow or ans == overflow and c > '7':
+                return int_max if sign == 1 else int_min
+            ans = ans * 10 + (ord(c) - ord('0'))
+        return sign * ans
+
+    def minimumDifference(self, nums: List[int], k: int) -> int:
+
+        ans = min(abs(x - k) for x in nums)
+        for i, x in enumerate(nums):
+
+            j = i - 1
+            while j >= 0 and nums[j] | x != nums[j]:
+                nums[j] |= x
+                ans = min(ans, abs(nums[j] - k))
+                j -= 1
+        return ans
+
+    def longestPalindrome(self, s: str) -> str:
+        """
+        f(i,j) = p(i+1,j-1) & si = sj
+            dp[i][j] 表示s[i:j]是否是回文串
+        """
+        n = len(s)
+        if n < 2:
+            return s
+        max_len, begin = 1, 0
+        dp = [[False] * n for _ in range(n)]
+        for i in range(n):
+            dp[i][i] = True
+
+        # 枚举子串长度 2-n
+        for L in range(2, n + 1):
+            # 枚举左端点
+            for i in range(n):
+                # L = j- i + 1
+                j = i + L - 1
+                if j >= n:
+                    break
+
+                if s[i] != s[j]:
+                    dp[i][j] = False
+                else:
+                    # 如果长度小于等于3 默认就是回文串
+                    if j - i < 3:
+                        dp[i][j] = True
+                    else:
+                        dp[i][j] = dp[i + 1][j - 1]
+                # 如果s[i,j]是回文串 且长度大于最大值
+                if dp[i][j] and L > max_len:
+                    max_len = L
+                    begin = i
+        return s[begin:begin + max_len]
+
+    def strStr(self, haystack: str, needle: str) -> int:
+        ans = -1
+        for i in range(len(haystack) - len(needle)):
+            if haystack[i:i + len(needle)] == needle:
+                return i
+        return ans
+
+    def maxSubArray(self, nums: List[int]) -> int:
+        n = len(nums)
+        ans = -math.inf
+        f = nums[0]
+        for i in range(1, n):
+            f = max(f, 0) + nums[i]
+            ans = max(ans, f)
+        return ans
+
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        # 按照开始区间排序
+        intervals.sort(key=lambda p: p[0])
+        merge = []
+        for p in intervals:
+            # 如果合并区间的结束 小于等于遍历的开始 可以合并
+            if merge and p[0] <= merge[-1][1]:
+                merge[-1][1] = max(merge[-1][1], p[1])
+            else:
+                merge.append(p)
+        return merge
+
+    def rotate(self, nums: List[int], k: int) -> None:
+
+        n = len(nums)
+
+        def reverser(i: int, j: int) -> None:
+            while i < j:
+                nums[i], nums[j] = nums[j], nums[i]
+                i += 1
+                j -= 1
+
+        k %= n
+        reverser(0, n - 1)
+        reverser(0, k - 1)
+        reverser(k, n - 1)
+
 
 s = Solution
-print(s.countOfSubstrings(s, 'ieaouqqieaouqq', 1))
+print(s.rotate(s, [1, 2, 3, 4, 5, 6, 7], 3))
