@@ -906,6 +906,50 @@ class Solution:
         reverser(0, k - 1)
         reverser(k, n - 1)
 
+    def numberOfPairs(self, nums1: List[int], nums2: List[int], k: int) -> int:
+
+        # 找出x //= k的 所有因子 然后sum在nums2中ctn的个数
+        ctn = defaultdict(int)
+        for x in nums1:
+            if x % k:
+                continue
+            x //= k
+            for d in range(1, math.isqrt(x) + 1):
+                # 找出x的因子
+                if x % d:
+                    continue
+                ctn[d] += 1
+                if d * d < x:
+                    ctn[x // d] += 1
+        return sum(ctn[p] for p in nums2)
+
+    def intToRoman(self, num: int) -> str:
+        R = [
+            ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'],
+            ['', 'X', 'XX', 'XXX', 'XL', 'L', 'LX', 'LX', 'LXXX', 'XC'],
+            ['', 'C', 'CC', 'CCC', 'CD', 'D', 'DC', 'DCC', 'DCCC', 'CM'],
+            ['', 'M', 'MM', 'MMM']
+        ]
+        return R[3][num // 1000] + R[2][num // 100 % 10] + R[1][num // 10 % 10] + R[0][num % 10]
+
+    def numDistinct(self, s: str, t: str) -> int:
+        m, n = len(s), len(t)
+        # 不符合子串
+        if m < n:
+            return 0
+        f = [[0] * (n + 1) for _ in range(m + 1)]
+        # 如果j = n 则空串是任何s的子串
+        for i in range(m + 1):
+            f[i][n] = 1
+        # 后向前遍历
+        for i in range(m - 1, -1, -1):
+            for j in range(n - 1, -1, -1):
+                if s[i] == t[j]:
+                    f[i][j] = f[i + 1][j + 1] + f[i + 1][j]
+                else:
+                    f[i][j] = f[i + 1][j]
+        return f[0][0]
+
 
 s = Solution
-print(s.rotate(s, [1, 2, 3, 4, 5, 6, 7], 3))
+print(s.intToRoman(s, 3749))
