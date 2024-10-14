@@ -983,6 +983,32 @@ class Solution:
                 if f[k] >= n:
                     return i
 
+    def evenOddBit(self, n: int) -> List[int]:
+        mask = 0x55555
+        return [(mask & n).bit_count(), (mask >> 1 & n).bit_count()]
+
+    def isPowerOfFour(self, n: int) -> bool:
+        mask = 0xaaaaaaa
+        return n >= 0 and n & (n - 1) == 0 and (mask & n) == 0
+
+    def minChanges(self, n: int, k: int) -> int:
+        return -1 if n & k != k else n ^ k.bit_count()
+
+    def findKOr(self, nums: List[int], k: int) -> int:
+        ans = 0
+        for i in range(max(nums).bit_length()):
+            ctn = sum(x >> i & 1 for x in nums)
+            if ctn >= k:
+                ans |= 1 << i
+        return ans
+
+    def minOperations(self, nums: List[int], k: int) -> int:
+
+        ans = 0
+        for x in nums:
+            ans ^= x
+        return (ans ^ k).bit_count()
+
 
 s = Solution
-print(s.intToRoman(s, 3749))
+print(s.findKOr(s, [7, 12, 9, 8, 9, 15], 4))
