@@ -1,3 +1,4 @@
+import itertools
 import math, heapq, re
 from bisect import bisect_right, bisect_left
 from builtins import str
@@ -949,6 +950,38 @@ class Solution:
                 else:
                     f[i][j] = f[i + 1][j]
         return f[0][0]
+
+    def duplicateNumbersXOR(self, nums: List[int]) -> int:
+        ans = vis = 0
+        for x in nums:
+            # 判断x 是否在vis集合中
+            if vis >> x & 1:
+                ans ^= x
+            else:
+                # 添加元素
+                vis |= (1 << x)
+        return ans
+
+    def superEggDrop(self, k: int, n: int) -> int:
+        '''
+            dfs(i,j)表示还剩i次操作机会 j个鸡蛋的情况下确认f的最大建筑层数
+            dfs(i,j)  = dfs(i-1,j) + dfs(i-1,j-1)+1
+            边界条件 dfs(i,0) = dfs(0,j) = 0
+
+            转化为dp
+            f[i][j] = f[i-1][j] + f[i-1][j-1] + 1
+
+            i 只和i-1有关联
+            f[j] = f[j] + f[j-1] + 1
+
+        '''
+
+        f = [0] * (k + 1)
+        for i in itertools.count(1):
+            for j in range(k, 0, -1):
+                f[j] = f[j] + f[j - 1] + 1
+                if f[k] >= n:
+                    return i
 
 
 s = Solution
