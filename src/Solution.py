@@ -1009,6 +1009,13 @@ class Solution:
             ans ^= x
         return (ans ^ k).bit_count()
 
+    def maxHeightOfTriangle(self, red: int, blue: int) -> int:
+        ctn = [0, 0]
+        for i in itertools.count(1):
+            ctn[i % 2] += i
+            if (ctn[0] > red or ctn[1] > blue) and (ctn[0] > blue or ctn[1] > red):
+                return i - 1
+
 
 s = Solution
-print(s.findKOr(s, [7, 12, 9, 8, 9, 15], 4))
+print(s.maxHeightOfTriangle(s, 2, 4))
