@@ -38,16 +38,24 @@ class Solution:
         return ans
 
     def subarraySum(self, nums: List[int], k: int) -> int:
-        left = -1
-        sum = 0
+        # left = -1
+        # sum = 0
+        # ans = 0
+        # for right, value in enumerate(nums):
+        #     sum += value
+        #     while sum >= k and left < right:
+        #         if sum == k:
+        #             ans += 1
+        #         left += 1
+        #         sum -= nums[left]
+        # return ans
+        pre_sum = 0
         ans = 0
-        for right, value in enumerate(nums):
-            sum += value
-            while sum >= k and left < right:
-                if sum == k:
-                    ans += 1
-                left += 1
-                sum -= nums[left]
+        ctn = defaultdict(int)
+        for x in nums:
+            ctn[pre_sum] += 1
+            pre_sum += x
+            ans += ctn[k - pre_sum]
         return ans
 
     def lengthOfLongestSubstring(self, s: str) -> int:
@@ -596,15 +604,15 @@ class Solution:
         return ctn
 
     def maximumTripletValue(self, nums: List[int]) -> int:
+        # (nums[i] - nums[j]) * nums[k]  枚举nums[j] 维护nums[j]左边的最大值和右侧最大值  保证(nums[i] - nums[j]) * nums[k]最大
         n = len(nums)
-        pre_max = [-1] * n
-        ans = 0
-        for i in range(1, n):
-            pre_max[i] = max(pre_max[i - 1], nums[i - 1])
-        suf_max = nums[-1]
-        for i in range(n - 2, 0, -1):
-            ans = max(ans, (pre_max[i] - nums[i]) * suf_max)
-            suf_max = max(suf_max, nums[i])
+        suf_max = [0] * (n + 1)
+        for i in range(n - 1, 0, -1):
+            suf_max[i] = max(suf_max[i + 1], nums[i])
+        ans = pre_max = 0
+        for j, x in enumerate(nums):
+            ans = max(ans, (pre_max - x) * suf_max[j + 1])
+            pre_max = max(pre_max, x)
         return ans
 
     def maximumSubsequenceCount(self, text: str, pattern: str) -> int:
@@ -872,25 +880,13 @@ class Solution:
         return ans
 
     def maxSubArray(self, nums: List[int]) -> int:
-        n = len(nums)
         ans = -math.inf
-        f = nums[0]
-        for i in range(1, n):
-            f = max(f, 0) + nums[i]
-            ans = max(ans, f)
+        pre_sum = pre_min_sum = 0
+        for x in nums:
+            pre_sum += x
+            pre_min_sum = min(pre_min_sum, pre_sum)
+            ans = max(ans, pre_sum - pre_min_sum)
         return ans
-
-    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
-        # 按照开始区间排序
-        intervals.sort(key=lambda p: p[0])
-        merge = []
-        for p in intervals:
-            # 如果合并区间的结束 小于等于遍历的开始 可以合并
-            if merge and p[0] <= merge[-1][1]:
-                merge[-1][1] = max(merge[-1][1], p[1])
-            else:
-                merge.append(p)
-        return merge
 
     def rotate(self, nums: List[int], k: int) -> None:
 
@@ -1016,6 +1012,265 @@ class Solution:
             if (ctn[0] > red or ctn[1] > blue) and (ctn[0] > blue or ctn[1] > red):
                 return i - 1
 
+    def numSubarraysWithSum(self, nums: List[int], goal: int) -> int:
+        pre_sum = 0
+        ctn = defaultdict(int)
+        ans = 0
+        for x in nums:
+            ctn[pre_sum] += 1
+            pre_sum += x
+            ans += ctn[pre_sum - goal]
+        return ans
+
+    def subarraysWithKDistinct(self, nums: List[int], k: int) -> int:
+        def cal(i: int) -> int:
+            ctn = Counter()
+            ans = left = 0
+            for right, x in enumerate(nums):
+                ctn[x] += 1
+                while len(ctn.keys()) > i and left <= right:
+                    c = nums[left]
+                    left += 1
+                    ctn[c] -= 1
+                    if ctn[c] == 0:
+                        del ctn[c]
+                ans += right - left + 1
+            return ans
+
+        return cal(k) - cal(k - 1)
+
+    def countSubarrays(self, nums: List[int], k: int) -> int:
+        ans = left = 0
+        s = 0
+        for right, x in enumerate(nums):
+            s += x
+            while left <= right and s * (right - left + 1) >= k:
+                s -= nums[left]
+                left += 1
+            ans += right - left + 1
+        return ans
+
+    def numberOfGoodPartitions(self, nums: List[int]) -> int:
+        mod = 1_000_000_007
+        dic = {}
+        for i, x in enumerate(nums):
+            if x in dic:
+                dic[x][1] = i
+            else:
+                dic[x] = [i, i]
+        a = sorted(dic.values(), key=lambda p: p[0])
+        m = 0
+        max_r = a[0][1]
+        for start, end in a[1:]:
+            if start > max_r:
+                m += 1
+            max_r = max(max_r, end)
+        m %= mod
+        return pow(2, m)
+
+    def minimumAverage(self, nums: List[int]) -> float:
+        nums.sort()
+        n = len(nums)
+        i, j = 0, n - 1
+        ans = math.inf
+        while i < j:
+            ans = min(ans, (nums[i] + nums[j]) / 2)
+            j -= 1
+            i += 1
+        return ans
+
+    def continuousSubarrays(self, nums: List[int]) -> int:
+        ans = left = 0
+        ctn = Counter()
+        for right, x in enumerate(nums):
+            ctn[x] += 1
+            while max(ctn) - min(ctn) > 2:
+                y = nums[left]
+                left += 1
+                ctn[y] -= 1
+                if ctn[y] == 0:
+                    del ctn[y]
+            ans += right - left + 1
+        return ans
+
+    def numSubarrayProductLessThanK(self, nums: List[int], k: int) -> int:
+        ans = left = 0
+        s = 1
+        for right, x in enumerate(nums):
+            s *= x
+            while left <= right and s >= k:
+                s /= nums[left]
+                left += 1
+            ans += right - left + 1
+        return ans
+
+    def beautifulBouquet(self, flowers: List[int], ctn: int) -> int:
+        mod = 10 ** 9 + 7
+        ans = left = 0
+        c = defaultdict(int)
+        for right, x in enumerate(flowers):
+            c[x] += 1
+            while c[x] > ctn:
+                c[flowers[left]] -= 1
+                left += 1
+            ans += right - left + 1
+        return ans % mod
+
+    def numberOfSubstrings(self, s: str) -> int:
+        ctn = [] * 3
+        ans = left = 0
+        for right, x in enumerate(s):
+            ctn[ord(x) - ord('a')] += 1
+            while left <= right and (ctn[0] >= 1 and ctn[1] >= 1 and ctn[2] >= 1):
+                ctn[ord(s[left]) - ord('a')] -= 1
+                left += 1
+            ans += left
+        return ans
+
+    def countGood(self, nums: List[int], k: int) -> int:
+        ans = left = 0
+        ctn = defaultdict(int)
+        s = 0
+        for right, x in enumerate(nums):
+            s += ctn[x]
+            ctn[x] += 1
+            while left < right and s >= k:
+                y = nums[left]
+                left += 1
+                ctn[y] -= 1
+                s -= ctn[y]
+                if ctn[y] == 0:
+                    del ctn[y]
+            ans += left
+        return ans
+
+    def countCompleteSubarrays(self, nums: List[int]) -> int:
+
+        k = len(Counter(nums).keys())
+        ans = left = 0
+        ctn = Counter()
+        for right, x in enumerate(nums):
+            ctn[x] += 1
+            while left <= right and len(ctn.keys()) == k:
+                y = nums[left]
+                left += 1
+                ctn[y] -= 1
+                if ctn[y] == 0:
+                    del ctn[y]
+            ans += left
+        return ans
+
+    def numberOfPermutations(self, n: int, requirements: List[List[int]]) -> int:
+        MOD = 1_00_000_007
+        req = [-1] * n
+        for end, ctn in requirements:
+            req[end] = ctn
+        if req[0]:
+            return 0
+
+        @cache
+        def dfs(i: int, j: int) -> int:
+            if i == 0:
+                return 1
+            r = req[i - 1]
+            if r >= 0:
+                return dfs(i - 1, r) if r <= j <= i + r else 0
+            return sum(dfs(i - 1, j - k) for k in range(min(i, j) + 1)) % MOD
+
+        return dfs(n - 1, req[-1])
+
+    def minOperations(self, nums: List[int]) -> int:
+        ans = 0
+        # 模拟每一次反转 如果num[i] = 0 反转当前三个 判断nums[-1]和nums[-2] 是否是1  不是1 则不能全部反转
+        for i in range(len(nums) - 2):
+            if nums[i] == 0:
+                nums[i + 1] ^= 1
+                nums[i + 2] ^= 1
+                ans += 1
+        return ans if nums[-1] and nums[-2] else -1
+
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals.sort(key=lambda p: p[0])
+        merge = []
+        for start, end in intervals:
+            if merge and start <= merge[-1][1]:
+                merge[-1][1] = max(end, merge[-1][1])
+            else:
+                merge.append([start, end])
+        return merge
+
+    def numberOfSubarrays(self, nums: List[int], k: int) -> int:
+        def check(i: int) -> int:
+            ans = left = 0
+            ctn = 0
+            for right, x in enumerate(nums):
+                ctn += (x % 2)
+                while left <= right and ctn > i:
+                    y = nums[left]
+                    # xxx 根据题意改编条件
+                    ctn -= (y % 2)
+                    left += 1
+                ans += right - left + 1
+            return ans
+
+        return check(k) - check(k - 1)
+
+    def minOperations(self, nums: List[int]) -> int:
+        """
+            x = nums[i] 分类讨论
+            x = 0 k为奇数  or x = 1 k为偶数时 经过反转已经变成1 不需要操作
+            x = 0 k为偶数  or x = 1 k为奇数时 经过反转已经变成0 需要操作
+            so x == k % 2 则当前需要反转
+
+        """
+        k = 0
+        for x in nums:
+            if x == k % 2:
+                k += 1
+        return k
+
+    def numOfSubarrays(self, arr: List[int]) -> int:
+        mod = 1_000_000_007
+        ans = pre_sum = 0
+        ctn = [0] * 2
+        for x in arr:
+            ctn[pre_sum % 2] += 1
+            pre_sum += x
+            ans += ctn[0] if pre_sum % 2 else ctn[1]
+        return ans % mod
+
+    def subarraysDivByK(self, nums: List[int], k: int) -> int:
+        # (pre_sum(right) - pre_sum(left)) % k == 0  --> 求同余
+        ans = pre_sum = 0
+        ctn = defaultdict(int)
+        for x in nums:
+            ctn[pre_sum % k] += 1
+            pre_sum += x
+            ans += ctn[pre_sum % k]
+        return ans
+
+    def checkSubarraySum(self, nums: List[int], k: int) -> bool:
+        pre_sum = 0
+        ctn = defaultdict(int)
+        for i, x in enumerate(nums):
+            if pre_sum % k not in ctn:
+                ctn[pre_sum % k] = i
+            pre_sum += x
+            if pre_sum % k in ctn and i - ctn[pre_sum % k] + 1 >= 2:
+                return True
+        return False
+
+    def smallestRangeII(self, nums: List[int], k: int) -> int:
+        nums.sort()
+        ans = nums[-1] - nums[0]
+        # 把nums分成[nums[0],...,nums[i]] [nums[i+1],...,nums[n-1]]
+        for x, y in pairwise(nums):
+            mx = max(nums[-1] - k, x + k)
+            mi = min(nums[0] + k, y - k)
+            ans = min(ans, mx - mi)
+        return ans
+
 
 s = Solution
-print(s.maxHeightOfTriangle(s, 2, 4))
+print(s.checkSubarraySum(s, [0, 0], 1))
+print(-5 // 5)

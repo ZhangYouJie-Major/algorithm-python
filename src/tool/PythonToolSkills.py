@@ -1,4 +1,4 @@
-from itertools import count, permutations, combinations
+from itertools import pairwise, count, permutations, combinations
 from collections import Counter, defaultdict
 
 '''
@@ -40,3 +40,8 @@ print('---------------')
 # 使用 permutations 生成排列
 for perm in combinations(letters, 3):
     print(perm)
+
+a = [1, 2, 3, 4, 5]
+for x, y in pairwise(a):
+    print(x)
+    print(y)
