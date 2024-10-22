@@ -8,7 +8,7 @@ from itertools import pairwise, accumulate, combinations, permutations
 from queue import PriorityQueue
 from typing import List, Dict, Optional
 
-from src.tool.Construct import ListNode
+from src.tool.Construct import ListNode, TreeNode
 
 
 class Solution:
@@ -1270,7 +1270,46 @@ class Solution:
             ans = min(ans, mx - mi)
         return ans
 
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
+        ans = 0
+        ctn = defaultdict(int)
+        ctn[0] = 1
+
+        def dfs(node: Optional[TreeNode], s: int):
+            if node is None:
+                return
+            nonlocal ans
+            s += node.val
+            ans += ctn[s - targetSum]
+            ctn[s] += 1
+            dfs(node.left, s)
+            dfs(node.right, s)
+            # 递归完成之后 要恢复现场
+            ctn[s] -= 1
+
+        dfs(root, 0)
+        return ans
+
+    def xorQueries(self, arr: List[int], queries: List[List[int]]) -> List[int]:
+
+        n = len(arr)
+        xors = [0] * (n + 1)
+        for i, x in enumerate(arr):
+            xors[i + 1] = xors[i] ^ x
+        ans = []
+        for x, y in queries:
+            ans.append(xors[y + 1] ^ xors[x])
+        return ans
+
+    def countCompleteDayPairs(self, hours: List[int]) -> int:
+        ans, H = 0, 24
+        ctn = [0] * H
+        for x in hours:
+            ans += ctn[(H - x % H) % H]
+            ctn[x % H] += 1
+        return ans
+
 
 s = Solution
-print(s.checkSubarraySum(s, [0, 0], 1))
+print(s.countCompleteDayPairs(s, [72, 48, 24, 3]))
 print(-5 // 5)
