@@ -1309,7 +1309,34 @@ class Solution:
             ctn[x % H] += 1
         return ans
 
+    def maximumTotalDamage(self, power: List[int]) -> int:
+        ctn = Counter(power)
+        a = sorted(ctn.keys())
+        f = [0] * (len(a) + 1)
+        j = 0
+        for i, x in enumerate(a):
+            while a[j] < x - 2:
+                j += 1
+            f[i + 1] = max(f[i], f[j] + x * ctn[x])
+        return f[-1]
+
+    def rob(self, nums: List[int]) -> int:
+        # def dfs(i: int) -> int:
+        #     if i < 0:
+        #         return 0
+        #     return max(dfs(i - 1), dfs(i - 2) + nums[i])
+        #
+        # return dfs(len(nums) - 1)
+        # dfs(i) = max(dfs(i-1),dfs(i-2)+nums[i])
+        n = len(nums)
+        if n <= 2:
+            return max(nums[0], nums[-1])
+        f = [0] * n
+        f[0], f[1] = nums[0], max(nums[1], nums[0])
+        for i in range(2, n):
+            f[i] = max(f[i - 1], f[i - 2] + nums[i])
+        return f[-1]
+
 
 s = Solution
-print(s.countCompleteDayPairs(s, [72, 48, 24, 3]))
-print(-5 // 5)
+print(s.rob(s, [2, 1, 1, 2]))
