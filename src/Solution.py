@@ -1337,6 +1337,72 @@ class Solution:
             f[i] = max(f[i - 1], f[i - 2] + nums[i])
         return f[-1]
 
+    def findWinningPlayer(self, skills: List[int], k: int) -> int:
+        return 1
+
+    def validStrings(self, n: int) -> List[str]:
+        ans = []
+        path = [''] * n
+
+        def dfs(i: int) -> None:
+            if i == n:
+                ans.append(''.join(path))
+                return
+            path[i] = '1'
+
+            dfs(i + 1)
+
+            if i == 0 or path[i - 1] == '1':
+                path[i] = '0'
+                dfs(i + 1)
+
+        dfs(0)
+        return ans
+
+    def getSmallestString(self, s: str) -> str:
+        a = list(s)
+        for i in range(len(a) - 1):
+            if a[i] > a[i + 1] and ord(a[i]) % 2 == ord(a[i + 1]) % 2:
+                a[i], a[i + 1] = a[i + 1], a[i]
+                break
+        return ''.join(a)
+
+    def maxEnergyBoost(self, energyDrinkA: List[int], energyDrinkB: List[int]) -> int:
+        n = len(energyDrinkA)
+        c = (energyDrinkA, energyDrinkB)
+
+        @cache
+        def dfs(i: int, j: int) -> int:
+            if i < 0:
+                return 0
+            return max(dfs(i - 1, j), dfs(i - 2, j ^ 1)) + c[j][i]
+
+        return max(dfs(n - 1, 0), dfs(n - 1, 1))
+
+    def maxOperations(self, nums: List[int], k: int) -> int:
+        ctn = Counter()
+        ans = 0
+        for x in nums:
+            if ctn[k - x]:
+                ctn[k - x] -= 1
+                ans += 1
+            else:
+                ctn[x] += 1
+        return ans
+
+    def losingPlayer(self, x: int, y: int) -> str:
+        return 'Alice' if min(x, y // 4) % 2 else 'Bob'
+
+    def resultsArray(self, nums: List[int], k: int) -> List[int]:
+        n = len(nums)
+        ans = [-1] * (n - k + 1)
+        ctn = 0
+        for i, x in enumerate(nums):
+            ctn = ctn + 1 if i == 0 or nums[i] == nums[i - 1] + 1 else 1
+            if ctn >= k:
+                ans[i - k + 1] = nums[i]
+        return ans
+
 
 s = Solution
-print(s.rob(s, [2, 1, 1, 2]))
+print(s.resultsArray(s, [1, 2, 3, 4, 3, 2, 5], 3))
