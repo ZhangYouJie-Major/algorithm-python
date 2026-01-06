@@ -1403,6 +1403,87 @@ class Solution:
                 ans[i - k + 1] = nums[i]
         return ans
 
+    def getConcatenation(self, nums: List[int]) -> List[int]:
+        nums.extend(nums)
+        return nums
+
+    def shuffle(self, nums: List[int], n: int) -> List[int]:
+        arr = [nums[i:i + n] for i in range(0, len(nums), n)]
+        ans = []
+        for j in range(0, len(arr[0])):
+            for i in range(len(arr)):
+                ans.append(arr[i][j])
+        return ans
+
+    def findMaxConsecutiveOnes(self, nums: List[int]) -> int:
+        ans = ctn = 0
+        for x in nums:
+            if x == 0:
+                ctn = 0
+            else:
+                ctn += 1
+            ans = max(ans, ctn)
+        return ans
+
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        nums.sort()
+        n = len(nums)
+        ans = []
+        for i in range(n - 2):
+            x = nums[i]
+            if i and nums[i - 1] == nums[i]:
+                continue
+            if x + nums[i + 1] + nums[i + 2] > 0:
+                break
+            if x + nums[-1] + nums[-2] < 0:
+                continue
+
+            j, k = i + 1, n - 1
+            while j < k:
+                s = nums[i] + nums[j] + nums[k]
+                if s > 0:
+                    k -= 1
+                elif s < 0:
+                    j += 1
+                else:
+                    ans.append([nums[i], nums[j], nums[k]])
+                    j += 1
+                    k -= 1
+                    while j < k and nums[j] == nums[j - 1]:
+                        j += 1
+                    while j < k and nums[k] == nums[k + 1]:
+                        k -= 1
+        return ans
+
+    def minimumRecolors(self, blocks: str, k: int) -> int:
+        ans = math.inf
+        ctn = 0
+        for i, b in enumerate(blocks):
+            if b == 'W':
+                ctn += 1
+            if i < k - 1:
+                continue
+            ans = min(ans, ctn)
+            ctn -= blocks[i - k + 1] == 'W'
+        return ans
+
+    def maxSum(self, nums: List[int], m: int, k: int) -> int:
+        ctn = Counter()
+        s = ans = 0
+        for i, x in enumerate(nums):
+            ctn[x] += 1
+            s += x
+            if i < k - 1:
+                continue
+            if len(ctn.keys()) >= m:
+                ans = max(ans, s)
+            remove_val = nums[i - k + 1]
+            s -= remove_val
+            ctn[remove_val] -= 1
+            if ctn[remove_val] == 0:
+                ctn.pop(remove_val)
+        return ans
+
 
 s = Solution
-print(s.resultsArray(s, [1, 2, 3, 4, 3, 2, 5], 3))
+print(s.maxSum(s, [2, 6, 7, 3, 1, 7], 3, 4))
