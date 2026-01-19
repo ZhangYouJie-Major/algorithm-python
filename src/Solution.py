@@ -6,7 +6,7 @@ from collections import deque, Counter, defaultdict
 from functools import cache
 from itertools import pairwise, accumulate, combinations, permutations
 from queue import PriorityQueue
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Set
 
 from src.tool.Construct import ListNode, TreeNode
 
@@ -1484,6 +1484,196 @@ class Solution:
                 ctn.pop(remove_val)
         return ans
 
+    def maximumSubarraySum(self, nums: List[int], k: int) -> int:
+        cnt = defaultdict(int)
+        ans = s = 0
+        for i, val in enumerate(nums):
+            s += val
+            cnt[val] += 1
+            if i < k - 1:
+                continue
+            if len(cnt) == k:
+                ans = max(ans, s)
+            cnt_out = nums[i - k + 1]
+            s -= cnt_out
+            cnt[cnt_out] -= 1
+            if cnt[cnt_out] == 0:
+                del cnt[cnt_out]
+        return ans
+
+    def maxScore(self, cardPoints: List[int], k: int) -> int:
+        s = 0
+        ans = math.inf
+        n = len(cardPoints)
+
+        if n == k:
+            return 0
+
+        for i, val in enumerate(cardPoints):
+            s += val
+            if i < (n - k) - 1:
+                continue
+            ans = min(ans, s)
+            s -= cardPoints[i - n + k + 1]
+
+        return sum(cardPoints) - ans
+
+    def findTheDistanceValue(self, arr1: List[int], arr2: List[int], d: int) -> int:
+        arr2.sort()
+        # |arr1[i]-arr2[j]| <= d -> 任意arr2[j] 不在区间 [x-d,x+d]就计入答案
+        ans = 0
+        for x in arr1:
+            i = bisect_left(arr2, x - d)
+            if i == len(arr2) or arr2[i] > x + d:
+                ans += 1
+        return ans
+
+    def answerQueries(self, nums: List[int], queries: List[int]) -> List[int]:
+        nums.sort()
+        for i in range(1, len(nums)):
+            nums[i] += nums[i - 1]
+        for i, val in enumerate(queries):
+            queries[i] = bisect_right(nums, val)
+        return queries
+
+    def maxProduct(self, root: Optional[TreeNode]) -> int:
+        def dfs(node: Optional[TreeNode]) -> int:
+            if node is None:
+                return 0
+            s = node.val + dfs(node.left) + dfs(node.right)
+            sun_sum.append(s)
+            return s
+
+        sun_sum = []
+        total = dfs(root)
+        ans = max(total * (total - s) for s in sun_sum)
+        return ans % 1_000_000_007
+
+    def maxDotProduct(self, nums1: List[int], nums2: List[int]) -> int:
+        m, n = len(nums1), len(nums2)
+        f = [[0] * n for _ in range(m)]
+        for i in range(m):
+            for j in range(n):
+                xij = nums1[i] * nums2[j]
+                # 只选nums1[i] 和  nums2[j]
+                f[i][j] = xij
+                if i > 0:
+                    # 不选i
+                    f[i][j] = max(f[i][j], f[i - 1][j])
+                if j > 0:
+                    # 不选j
+                    f[i][j] = max(f[i][j], f[i][j - 1])
+                if i > 0 and j > 0:
+                    # 前面的数组最大 + ij
+                    f[i][j] = max(f[i][j], f[i - 1][j - 1] + xij)
+        return f[-1][-1]
+
+    def subtreeWithAllDeepest(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        max_depth = -1
+        ans = None
+
+        def dfs(node: Optional[TreeNode], depth: int) -> int:
+            nonlocal ans, max_depth
+            if node is None:
+                max_depth = max(depth, max_depth)
+                return depth
+            left_depth = dfs(node.left, depth + 1)
+            right_depth = dfs(node.right, depth + 1)
+            if max_depth == left_depth == right_depth:
+                ans = node
+            return max(left_depth, right_depth)
+
+        dfs(root, max_depth)
+        return ans
+
+    def reorderList(self, head: Optional[ListNode]) -> None:
+        """
+        Do not return anything, modify head in-place instead.
+        """
+
+        # 利用快慢指针找到中间节点
+        fast = slow = head
+        while fast and fast.next:
+            fast = fast.next.next
+            slow = slow.next
+        mid = slow
+
+        # 翻转中间节点把链表编程两段
+        pre = None
+        cur = mid
+        while cur:
+            nxt = cur.next
+            cur.next = pre
+            pre = cur
+            cur = nxt
+        head2 = pre
+
+        while head2.next:
+            nxt = head.next
+            nxt2 = head2.next
+            head.next = head2
+            head2.next = nxt
+            head = nxt
+            head2 = nxt2
+        return head
+
+    def separateSquares(self, squares: List[List[int]]) -> float:
+        M = 1_000_000
+        total_area = sum(l * l for _, _, l in squares)
+
+        def check(y: int) -> bool:
+            area = 0
+            for _, yi, l in squares:
+                if yi < y:
+                    area += l * min(y - yi, l)
+            return area >= total_area / 2
+
+        left = 0
+        right = max_y = max(y + l for _, y, l in squares)
+        for _ in range((max_y * M).bit_length()):
+            mid = (left + right) / 2
+            if check(mid):  # 左边区间
+                right = mid
+            else:
+                left = mid
+        return (left + right) / 2
+
+    def maximizeSquareArea(self, m: int, n: int, hFences: List[int], vFences: List[int]) -> int:
+        def f(a: List[int], mx: int) -> Set[int]:
+            a += [1, mx]
+            a.sort()
+            return set(y - x for x, y in combinations(a, 2))
+
+        h_set = f(hFences, m)
+        v_set = f(vFences, n)
+        ans = max(h_set & v_set, default=0)
+        return ans * ans % 1_000_000_007 if ans else -1
+
+    def longestCommonPrefix(self, strs: List[str]) -> str:
+        s0 = strs[0]
+        for j, c in enumerate(s0):
+            for s in strs:
+                if len(s) == j or s[j] != c:
+                    return s0[0:j]
+        return s0
+
+    def maxSideLength(self, mat: List[List[int]], threshold: int) -> int:
+        m, n = len(mat), len(mat[0])
+        s = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(m):
+            for j in range(n):
+                s[i + 1][j + 1] = s[i][j + 1] + s[i + 1][j] - s[i][j] + mat[i][j]
+
+        def query(r1, c1, r2, c2) -> int:
+            return s[r2 + 1][c2 + 1] - s[r2 + 1][c1] - s[r1][c2 + 1] + s[r1][c1]
+
+        ans = 0
+        for i in range(m):
+            for j in range(n):
+                while ans + i < m and ans + j < n and query(i, j, ans + i, ans + j) <= threshold:
+                    ans += 1
+        return ans
+
 
 s = Solution
-print(s.maxSum(s, [2, 6, 7, 3, 1, 7], 3, 4))
+print(s.isIsomorphic(s, 'bbbaaaba', 'aaabbbba'))

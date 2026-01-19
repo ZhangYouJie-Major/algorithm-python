@@ -1,3 +1,14 @@
+import itertools
+import math, heapq, re
+from bisect import bisect_right, bisect_left
+from builtins import str
+from collections import deque, Counter, defaultdict
+from functools import cache
+from itertools import pairwise, accumulate, combinations, permutations
+from queue import PriorityQueue
+from typing import List, Dict, Optional, Set
+from src.tool.Construct import ListNode, TreeNode
+
 # 双指针
 
 # 二分
@@ -83,3 +94,46 @@ class SlidingWindowsSkill:
 
     def check3(self, i: int) -> int:
         return self.check1(i) - self.check1(i - 1)
+
+
+class BinarySearchSkill:
+    def lower_bound(self, nums: List[int], target: int) -> int:
+        """返回第一个 >= target 的下标，若不存在返回 len(a)"""
+        left, right = 0, len(nums) - 1
+        while left <= right:
+            mid = (left + right) // 2
+            if nums[mid] < target:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return left
+
+    """
+        | 需求          | 一行代码                          |
+        | ----------- | -----------------------------     |
+        | ≥x 的第一个下标   | `bisect_left(a, x)`           |
+        | >x 的第一个下标   | `bisect_right(a, x)`          |
+        | <x 的最后一个下标 | `bisect_left(a, x) - 1`       |
+        | ≤x 的最后一个下标  | `bisect_right(a, x) - 1`      |
+        | `<x` 的元素个数  | `bisect_left(a, x)`           |
+        | `≤x` 的元素个数  | `bisect_right(a, x)`          |
+        | `≥x` 的元素个数  | `len(a) - bisect_left(a, x)`  |
+        | `>x` 的元素个数  | `len(a) - bisect_right(a, x)` |
+    """
+
+
+class NumMatrix:
+
+    def __init__(self, matrix: List[List[int]]):
+        m, n = len(matrix), len(matrix[0])
+        s = [[0] * (n + 1) for _ in range(m + 1)]
+        """
+            初始化 m+1 n+1
+        """
+        for i in range(m):
+            for j in range(n):
+                s[i + 1][j + 1] = s[i][j + 1] + s[i + 1][j] - s[i][j] + matrix[i][j]
+        self.s = s
+
+    def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:
+        return self.s[row2 + 1][col2 + 1] - self.s[row2 + 1][col1] - self.s[row1][col2 + 1] + self.s[row1][col1]
