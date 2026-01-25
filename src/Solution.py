@@ -1695,6 +1695,92 @@ class Solution:
                     ans += 1
         return ans
 
+    def carPooling(self, trips: List[List[int]], capacity: int) -> bool:
+        d = [0] * 1001
+        for num, _from, _to in trips:
+            d[_from] += num
+            d[_to] -= num
+        return all(s <= capacity for s in accumulate(d))
+
+    def subarraySum(self, nums: List[int]) -> int:
+        n = len(nums)
+        a = list(accumulate(nums, initial=0))
+        return sum(a[i + 1] - a[i - nums[i]] if i - nums[i] > 0 else a[i + 1] for i in range(n))
+
+    def generateParenthesis(self, n: int) -> List[str]:
+        ans = []
+        path = []  #
+
+        def dfs(i, balance):
+            if len(path) == n:
+                s = [')'] * (2 * n)
+                for j in path:
+                    s[j] = '('
+                ans.append(''.join(s))
+                return
+            for right in range(balance + 1):
+                path.append(i + right)
+                dfs(i + right + 1, balance - right + 1)
+                path.pop()
+
+        dfs(0, 0)
+        return ans
+
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        n = len(nums)
+        ans = []
+        path = [0] * n
+        on_path = [False] * n
+
+        def dfs(i):
+            if i == n:
+                ans.append(path[:])
+                return
+            for j, on in enumerate(on_path):
+                if not on:
+                    path[i] = nums[j]
+                    on_path[j] = True
+                    dfs(i + 1)
+                    on_path[j] = False
+
+        dfs(0)
+        return ans
+
+    def binaryTreePaths(self, root: Optional[TreeNode]) -> List[str]:
+
+        ans = []
+
+        def dfs(node, path):
+            if node is None:
+                return
+            path += str(node.val)
+            if not node.left and not node.right:
+                ans.append(path)
+            path += '->'
+            dfs(node.left, path)
+            dfs(node.right, path)
+
+        dfs(root, '')
+        return ans
+
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> List[List[int]]:
+        ans = []
+        path = []
+
+        def dfs(node, rem):
+            if node is None:
+                return
+            rem -= node.val
+            path.append(node.val)
+            if not node.left and not node.right and rem == 0:
+                ans.append(path[:])
+            dfs(node.left, rem)
+            dfs(node.right, rem)
+            path.pop()
+
+        dfs(root, targetSum)
+        return ans
+
     def letterCombinations(self, digits: str) -> List[str]:
         MAPPING = ["", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "xyz"]
         n = len(digits)
