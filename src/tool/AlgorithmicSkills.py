@@ -29,8 +29,24 @@ from src.tool.Construct import ListNode, TreeNode
     于是我们可以推导出
     a[left] + a[1] + ... + a[right] -> (a[0] + a[1] + ... + a[right]) - (a[0] + a[1] + ... + a[left-1])
     -> s[right+1] -  s[left]
+    s = [0] * (n + 1)
+    for i in range(n):
+        s[i+1] = s[i] + nums[i]
+    nums[i] + nums[i + 1] ... + nums[j] = s[j+1] -s[i]        
 
     2、二维前缀和
+    
+    s = [[0] * (n + 1) for _ in range(m + 1)]
+    s[i + 1][j + 1] = s[i][j + 1] + s[i + 1][j] - s[i][j] + nums[i][j]
+    
+    for i in range(m):
+        for j in range(n):
+            s[i + 1][j + 1] = s[i][j + 1] + s[i + 1][j] - s[i][j] + matrix[i][j]
+            
+    从row1,col1 到 row2,col2 的sum  s[row2+1][col2+1] - s[row2+1][col1] - s[row1][col2+1] + s[row1][col1]
+    
+
+    
 """
 
 # 差分
@@ -53,6 +69,41 @@ from src.tool.Construct import ListNode, TreeNode
 
 
 # 记忆化搜索到动态规划
+# class MemoizedSearch:
+
+
+class DynamicProgramming:
+    """
+        capacity 背包容量
+        w[i]: 第i个物品的体积
+        v[i]: 第i个物品的价值
+    """
+
+    def zero_one_knapsack(self, capacity: int, w: List[int], v: List[int]) -> int:
+        n = len(w)
+
+        @cache
+        def dfs(i, c):
+            if i < 0:
+                return 0
+            if c < w[i]:
+                return dfs(i - 1, c)
+            return max(dfs(i - 1, c), dfs(i - 1, c - w[i]) + v[i])
+
+        return dfs(n - 1, capacity)
+
+    def unbounded_knapsack(self, capacity: int, w: List[int], v: List[int]) -> int:
+        n = len(w)
+
+        @cache
+        def dfs(i, c):
+            if i < 0:
+                return 0
+            if c < w[i]:
+                return dfs(i - 1, c)
+            return max(dfs(i - 1, c), dfs(i, c - w[i]) + v[i])
+
+        return dfs(n - 1, capacity)
 
 
 class SlidingWindowsSkill:

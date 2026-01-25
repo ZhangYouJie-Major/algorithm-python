@@ -636,24 +636,22 @@ class Solution:
         return ans
 
     def maxProfit2(self, prices: List[int]) -> int:
-        """
-         n = len(prices)
-        @cache
-        def dfs(i: int, hold: bool) -> int:
-            if i < 0:
-                return -math.inf if hold else 0
-            if hold:
-                return max(dfs(i - 1, True), dfs(i - 1, False) - prices[i])
-            return max(dfs(i - 1, False), dfs(i - 1, True) + prices[i])
-
-        return dfs(n - 1, False)
-        """
-        buy = -prices[0]
-        sell = 0
-        for p in prices:
-            buy = max(buy, sell - p)
-            sell = max(sell, buy + p)
-        return sell
+        n = len(prices)
+        f0 = 0
+        pre0 = 0
+        f1 = -prices[0]
+        for i in range(1, n):
+            pre0, f0, f1 = f0, max(f0, f1 + prices[i]), max(f1, f0 - prices[i])
+        return f0
+        # @cache
+        # def dfs(i, hold):
+        #     if i < 0:
+        #         return -math.inf if hold else 0
+        #     if hold:
+        #         return max(dfs(i - 1, True), dfs(i - 1, False) - prices[i])
+        #     return max(dfs(i - 1, False), dfs(i - 1, True) + prices[i])
+        #
+        # return dfs(n - 1, False)
 
     def maxProfit3(self, prices: List[int]) -> int:
         n = len(prices)
@@ -665,6 +663,29 @@ class Solution:
             buy_2 = max(buy_2, sell_1 - prices[i])
             sell_2 = max(sell_2, buy_2 + prices[i])
         return sell_2
+
+    def maxProfit4(self, k: int, prices: List[int]) -> int:
+        f = [[-math.inf] * 2 for _ in range(k + 2)]
+        for j in range(1, k + 2):
+            f[j][0] = 0
+        for i, p in enumerate(prices):
+            for j in range(1, k + 2):
+                f[j][0] = max(f[j][0], f[j - 1][1] + p)
+                f[j][1] = max(f[j][1], f[j][0] - p)
+        return f[k + 1][0]
+
+        #
+        # @cache
+        # def dfs(i, j, hold):
+        #     if j < 0:
+        #         return -math.inf
+        #     if i < 0:
+        #         return -math.inf if hold else 0
+        #     if hold:
+        #         return max(dfs(i - 1, j, True), dfs(i - 1, j - 1, False) - prices[i])
+        #     return max(dfs(i - 1, j, False), dfs(i - 1, j - 1, True) + prices[i])
+        #
+        # return dfs(n - 1, k, False)
 
     def differenceOfSum(self, nums: List[int]) -> int:
         ans = 0
@@ -1674,6 +1695,234 @@ class Solution:
                     ans += 1
         return ans
 
+    def letterCombinations(self, digits: str) -> List[str]:
+        MAPPING = ["", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "xyz"]
+        n = len(digits)
+        if n == 0:
+            return []
+        ans = []
+        path = [""] * n
+
+        def f(i):
+            if i == n:
+                ans.append("".join(path))
+                return
+            for c in MAPPING[int(digits[i])]:
+                path[i] = c
+                f(i + 1)
+
+        f(0)
+        return ans
+
+    def minBitwiseArray(self, nums: List[int]) -> List[int]:
+        for i, x in enumerate(nums):
+            if x == 2:
+                nums[i] = -1
+            else:
+                t = -x
+                nums ^= (t & -t) >> 1
+        return nums
+
+    def combine(self, n: int, k: int) -> List[List[int]]:
+        ans = []
+        path = []
+
+        def f(i):
+
+            if sum(path) == n and len(path) == k:
+                ans.append(path.copy())
+                return
+
+            for j in range(i, 0, -1):
+                path.append(j)
+                f(j - 1)
+                path.pop()
+
+        f(9)
+        return ans
+
+    def solveNQueens(self, n: int) -> List[List[str]]:
+        ans = []
+        col = [0] * n  # 表示每一行的 Q具体在哪一列
+
+        # def isVaild(r, c):
+        #     # 枚举前r-1行
+        #     for R in range(r):
+        #         C = col[R]
+        #         if c + r == C + R or c - r == C - R:
+        #             return False
+        #     return True
+
+        def dfs(r, s):  # r行 可以选的列
+            if r == n:
+                ans.append(['.' * c + 'Q' + '.' * (n - 1 - c) for c in col])
+                return
+            for c in s:
+                # 内置函数
+                if all((r + c != R + col[R] and c - r != col[R] - R) for R in range(r)):
+                    col[r] = c
+                    dfs(r + 1, s - {c})
+
+        dfs(0, set(range(n)))
+        return ans
+
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        target += sum(nums)
+        if target < 0 or target % 2:
+            return 0
+        target //= 2
+        f = [0] * (target + 1)
+        f[0] = 1
+        for x in nums:
+            for c in range(target, x - 1, -1):
+                f[c] = f[c] + f[c - x]
+        return f[target]
+
+        # def dfs(i, c):
+        #     if i < 0:
+        #         return 1 if c == 0 else 0
+        #     if c < nums[i]:
+        #         dfs(i - 1, c)
+        #     return dfs(i, c) + dfs(i - 1, c - nums[i])
+        #
+        # return dfs(n - 1, target)
+
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        f = [math.inf] * (amount + 1)
+        f[0] = 0
+
+        for i, x in enumerate(coins):
+            for c in range(x, amount + 1):
+                f[c] = min(f[c], f[c - x] + 1)
+
+        ans = f[amount]
+        return ans if ans < math.inf else -1
+
+        # @cache
+        # def dfs(i, c):
+        #     if i < 0:
+        #         return 0 if c == 0 else math.inf
+        #     if c < coins[i]:
+        #         return dfs(i - 1, c)
+        #     return min(dfs(i - 1, c), dfs(i, c - coins[i]) + 1)
+        #
+        # ans = dfs(n - 1, amount)
+        # return -1 if ans == math.inf else ans
+
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        """
+            dfs(i,j) =dfs(i-1,j-1) + 1 s[i] = t[j]
+            dfs(i,j) = max(dfs(i-1,j),dfs(i,j-1)) s[i] != t[j]
+        """
+        m = len(text1)
+        n = len(text2)
+        f = [[0] * (n + 1) for _ in range(m + 1)]
+        for i, x in enumerate(text1):
+            for j, y in enumerate(text2):
+                if x == y:
+                    f[i + 1][j + 1] = f[i][j] + 1
+                else:
+                    f[i + 1][j + 1] = max(f[i][j + 1], f[i + 1][j])
+        return f[m][n]
+
+        # @cache
+        # def dfs(i, j):
+        #     if i < 0 or j < 0:
+        #         return 0
+        #     if text1[i] == text2[j]:
+        #         return dfs(i - 1, j - 1) + 1
+        #     return max(dfs(i - 1, j), dfs(i, j - 1))
+        #
+        # return dfs(m - 1, n - 1)
+
+    def minDistance(self, word1: str, word2: str) -> int:
+        """
+            dfs(i,j) = dfs(i-1,j-1)
+            dfs(i,j) = min(dfs(i,j-1) ,dfs(i-1,j),dfs(i-1,j-1)) + 1
+        """
+        m = len(word1)
+        n = len(word2)
+        f = [[0] * (n + 1) for _ in range(m + 1)]
+        f[0] = list(range(n + 1))
+
+        for i, x in enumerate(word1):
+            f[i + 1][0] = i + 1
+            for j, y in enumerate(word2):
+                if x == y:
+                    f[i + 1][j + 1] = f[i][j]
+                else:
+                    f[i + 1][j + 1] = min(f[i][j + 1], f[i + 1][j], f[i][j]) + 1
+        return f[m][n]
+
+        # @cache
+        # def dfs(i, j):
+        #     if i < 0:
+        #         return j + 1
+        #     if j < 0:
+        #         return i + 1
+        #     if word1[i] == word2[j]:
+        #         return dfs(i - 1, j - 1)
+        #     return min(dfs(i, j - 1), dfs(i - 1, j), dfs(i - 1, j - 1)) + 1
+        #
+        # return dfs(m - 1, n - 1)
+
+    def lengthOfLIS(self, nums: List[int]) -> int:
+
+        g = []
+        for x in nums:
+            index = bisect_left(g, x)
+            if index == len(g):
+                g.append(x)
+            else:
+                g[index] = x
+        return len(g)
+
+        # n = len(nums)
+        # f = [0] * n
+        #
+        # for i in range(n):
+        #     res = 0
+        #     for j in range(i):
+        #         if nums[j] < nums[i]:
+        #             res = max(res, f[j])
+        #     f[i] = res + 1
+        # return max(x for x in f)
+
+        # @cache
+        # def dfs(i):
+        #     res = 0
+        #     for j in range(i):
+        #         if nums[j] < nums[i]:
+        #             res = max(res, dfs(j))
+        #     return res + 1
+        #
+        # ans = 0
+        # for i in range(n):
+        #     ans = max(ans, dfs(i))
+        # return ans
+
+    def longestPalindromeSubseq(self, s: str) -> int:
+        n = len(s)
+
+        f = [[0] * n for _ in range(n)]
+        for i in range(n - 1, -1, -1):
+            f[i][i] = 1
+            j = n - 1 - i
+            if s[i] == s[j]:
+                f[i][j] = f[i + 1][j - 1] + 2
+            else:
+                f[i][j] = max(f[i][j - 1], f[i + 1][j])
+        return f[0][n - 1]
+
+        # def dfs(i, j):
+        #     if i > j:
+        #         return 0
+        #     if s[i] == s[j]:
+        #         return dfs(i + 1, j - 1) + 2
+        #     return max(dfs(i + 1, j), dfs(i, j - 1))
+        #
+        # return dfs(0, n - 1)
+
 
 s = Solution
-print(s.isIsomorphic(s, 'bbbaaaba', 'aaabbbba'))
+print(s.longestPalindromeSubseq(s, 'bbbab'))
